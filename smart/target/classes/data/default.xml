@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+
+<!-- property를 이용해 DB 연결하는 DBCP 객체 생성 -->
+<context:property-placeholder location="classpath:data/db.properties"  />
+
+<bean id="dbcp" class="org.apache.commons.dbcp.BasicDataSource">	<!-- 객체(bean) 생성해 메모리에 주소를 담는다 -> 변수(id)에 -->
+	<property name="driverClassName" value="${db.driver}"   />
+	<property name="url" value="${db.url}"  />
+	<property name="username" value="${db.username}" />
+	<property name="password" value="${db.password}" />
+</bean>
+
+<!-- Mybatis와 DB를 연결하기 위한 처리 -->
+<bean id="factory" class="org.mybatis.spring.SqlSessionFactoryBean">	
+	<property name="dataSource" ref="dbcp"/>
+	<property name="mapperLocations" value="classpath:sqlmap/*-mapper.xml"  />	<!--xml에 쿼리문을 만들고 그 쿼리문을 찾아갈 수 있도록 하는 -->
+</bean>
+
+<!-- 쿼리문을 실행하기 위한 실행 객체 -->
+<bean class="org.mybatis.spring.SqlSessionTemplate">
+	<constructor-arg name="sqlSessionFactory" ref="factory" />	<!--setter메소드가 없이 생성자로 만들었기 때문에 property가 아닌 constructor로 -->
+</bean>
+
+<!-- 파일첨부 -->
+<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	<property name="defaultEncoding" value="utf-8"/>
+</bean>
+
+</beans>

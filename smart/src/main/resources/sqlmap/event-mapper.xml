@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="event.mapper">
+
+<update id="update">
+	update s_event 
+	set title=#{title}, content=#{content},
+		filename=#{filename, jdbcType=VARCHAR}, 
+		filepath=#{filepath, jdbcType=VARCHAR}
+	where id=#{id}
+</update>
+
+<delete id="delete">
+	delete from s_event where id=#{id}
+</delete>
+
+<update id="read">
+	update s_event set readcnt = readcnt+1 where id=#{id}
+</update>
+
+<select id="detail" resultType="event.EventVO">
+	select (select name from member
+	        where userid=e.userid) name, e.* 
+	from s_event e where id=#{id}
+</select>
+
+<insert id="insert">
+	insert into s_event
+		(title, content, userid, filename, filepath)
+	values 
+		( #{title}, #{content}, #{userid}, 
+		  #{filename, jdbcType=VARCHAR}, 
+		  #{filepath, jdbcType=VARCHAR} )
+</insert>
+
+<sql id="search">
+	<if test="search=='all'">
+		where title like '%' || #{keyword} || '%'
+		or content like '%' || #{keyword} || '%'
+		or userid in (select userid from member
+		              where name like '%' || #{keyword} || '%' )
+	</if>
+	<if test="search=='title' or search=='content'">
+		where ${search} like '%' || #{keyword} || '%'
+	</if>
+	<if test="search=='writer'">
+		where userid in (select userid from member
+		                 where name like '%' || #{keyword} || '%' )
+	</if>
+</sql>
+
+<select id="list" resultType="event.EventVO">
+	select (select count(*) from event_comment where pid=e.id) comments, (select name from member where userid=e.userid) name, e.* 
+	from (select rownum no, e.*  
+		from (select * from s_event <include refid="search"/> 
+			  order by id) e
+		order by no desc) e
+	where no between #{beginList} and #{endList}
+</select>
+
+<select id="totalCount" resultType="integer">
+	select count(*) from s_event <include refid="search"/>
+</select>
+
+<insert id="comment_insert">
+	insert into event_comment(pid, userid, content)
+	values ( #{pid}, #{userid}, #{content})
+</insert>
+
+<select id="comment_list" resultType="event.CommentVO">	<!-- 조회된 결과를 담아야 하니까 resultType="event.CommentVO" -->
+	select to_char(writedate, 'yyyy-mm-dd hh:mi:ss') writedate, e.*, (select name from member where userid=e.userid) name
+	from event_comment e
+	where pid=#{pid}
+	order by id desc
+</select>
+
+<delete id="comment_delete">
+	delete from event_comment where id=#{id}
+</delete>
+
+<update id="comment_update">
+	update event_comment set content=#{content} where id=#{id}
+</update>
+</mapper>
+

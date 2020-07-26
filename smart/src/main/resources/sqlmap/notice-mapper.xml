@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="notice.mapper">
+
+<sql id="search">
+	<if test="search=='title' or search=='content'">
+		where ${search} like '%' || #{keyword} || '%'
+	</if>
+	
+	<if test="search=='writer'">
+		where writer in (select userid from member where name like '%' || #{keyword} || '%')
+	</if>
+	
+	<if test="search=='all'">
+		where title like '%' || #{keyword} || '%'
+		or content like '%' || #{keyword} || '%'
+		or writer in (select userid from member where name like '%' || #{keyword} || '%')
+	</if>
+</sql>
+
+<select id="totalCount" resultType="integer">
+	select count(*) from notice <include refid="search"/>
+</select>
+
+<select id="list" resultType="notice.NoticeVO">
+	select (select name from member where userid=writer) writer, n.* from
+	(select n.*, rownum no
+	from (select * from notice <include refid="search"/> order by id) n
+	order by no desc) n
+	where no between #{beginList} and #{endList}
+</select>
+
+<insert id="insert">
+	insert into notice(title, content, writer, filename, filepath)
+	values(#{title}, #{content}, #{writer}, #{filename, jdbcType=VARCHAR}, #{filepath, jdbcType=VARCHAR})
+</insert>
+
+<select id="detail" resultType="notice.NoticeVO">
+	select (select name from member where userid=writer) writer, n.*
+	from notice n where id = #{id}
+</select>
+
+<update id="read">
+	update notice set readcnt = readcnt+1 where id=#{id}
+</update>
+
+<update id="update">
+	update notice
+	set title=#{title}, content=#{content}, filename=#{filename, jdbcType=VARCHAR}, filepath=#{filepath, jdbcType=VARCHAR}
+	where id=#{id}
+</update>
+
+<delete id="delete">
+	delete from notice where id=#{id}
+</delete>
+
+</mapper>

@@ -1,0 +1,146 @@
+VO -> Service(인터페이스) -> ServiceImpl -> DAO(인터페이스구현)
+
+필요한 라이브러리를 찾는 곳 : mvnrepository.com
+DB 연결하기 위한 라이브러리 : JDBC
+
+1. 스프링에서 jdbc를 사용하기 위한 라이브러리 다운로드 받아  pom.xml dependencies 안에 추가 - jdbc 검색
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-jdbc</artifactId>
+    <version>5.1.5.RELEASE</version>
+</dependency>
+
+2. DBCP 를 사용하기 위한 라이브러리 도 pom.xml dependencies 안에 추가 - dbcp 검색 - Commons DBCP 선택
+<dependency>
+    <groupId>commons-dbcp</groupId>
+    <artifactId>commons-dbcp</artifactId>
+    <version>1.4</version>
+</dependency>
+
+3. 사용할 DB인 오라클 라이브러리 : maven.jahia.org/maven2 - 어떤 DB를 사용할 것인지 선언해줘야 함(MySQL인지 Oracle인지..)
+<dependency>
+    <groupId>com.oracle</groupId>
+    <artifactId>ojdbc6</artifactId>
+    <version>12.1.0.2</version>
+</dependency>
+
+DB에 대한 Mybatis 프레임워크를 사용하도록 하자 -> mybatis 검색 -> mybatis spring 선택
+4. 스프링에서 Mybatis 를 사용하기 위한 라이브러리 (Mybatis : try catch 일일이 할 필요없게 하기위해)
+<dependency>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis-spring</artifactId>
+    <version>1.3.2</version>
+</dependency>
+
+5. Mybatis 를 사용하기 위한 라이브러리  -> mybatis 검색 -> mybatis 선택
+
+
+Java Resources > src/main/resources 에 data라는 폴더를 만들고 파일을 하나 만들어 처리하자
+
+Mybatis 는 쿼리문을 태그로 작성해 사용한다. (xml파일 필요 -> resources에 sqlmap 패키지 생성)
+
+
+6. 화면의 형태의 템플릿을 지정하는데 사용할 라이브러리 - tiles
+<dependency>
+    <groupId>org.apache.tiles</groupId>
+    <artifactId>tiles-jsp</artifactId>
+    <version>3.0.5</version>
+</dependency>
+
+
+
+자료구조
+List > ArrayList<Type>(조회에 용이), LinkedList(삽입, 수정에 용이)
+Map > HashMap<K, V>
+
+
+파일첨부 -> mvnrepository.com -> fileupload검색
+<dependency>
+    <groupId>commons-fileupload</groupId>
+    <artifactId>commons-fileupload</artifactId>
+    <version>1.3.3</version>
+</dependency>
+
+
+
+< 행사관리 테이블 >
+create table s_event(
+	id			number constraint s_event_id_pk primary key,
+	title		varchar2(300) not null,
+	content 	varchar2(4000) not null,
+	userid		varchar2(50) not null,
+	writedate	date default sysdate not null,
+	readcnt		number default 0,
+	filename	varchar2(300),
+	filepath	varchar2(300)
+);
+
+id가 1씩 증가하게 sequence 생성
+create sequence seq_event
+start with 1 increment by 1;
+
+트리거생성
+create or replace trigger trg_event
+	before insert on s_event
+	for each row
+begin
+	select seq_event.nextval into :new.id from dual;
+end;
+/
+
+
+< 행사댓글 테이블 >
+create table event_comment(
+	id			number constraint event_comment_id_pk primary key,
+	pid			number not null, /*댓글 대상인 원글 id*/
+	userid		varchar2(50),
+	content		varchar2(4000),
+	writedate	date default sysdate,
+	constraint e_comment_pid_fk foreign key(pid) references s_event(id) on delete cascade,
+	constraint e_comment_userid_fk foreign key(userid) references member(userid)
+);
+--on delete cascade : 원글이 삭제될 때 댓글도 삭제되도록 처리
+
+id컬럼에 적용할 sequence 생성
+create sequence seq_event_comment
+start with 1 increment by 1;
+
+trigger 생성
+create or replace trigger trg_event_comment
+	before insert on event_comment
+	for each row
+begin
+	select seq_event_comment.nextval into :new.id from dual;
+end;
+/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
