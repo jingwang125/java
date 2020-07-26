@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="menu.mapper">
+
+	<select id="shoplist" resultType="menu.ShopVO">
+		select * from shop
+	</select>
+
+	<select id="roomlist" resultType="menu.ShopVO">
+		select * from shop where
+		shop_id = #{shop_id}
+	</select>
+
+
+	<insert id="insertshop">
+		insert into shop
+			(shop_place
+			,ro_name1
+			,ro_name2
+			,ro_name3
+			,ro_name4
+			,ro_name5
+			,ro_name6
+			,ro_name7
+			,ro_name8
+			,ro_name9
+			,ro_name10)
+		VALUES
+			(#{shop_place,jdbcType=VARCHAR}
+			,#{ro_name1,jdbcType=VARCHAR}
+			,#{ro_name2,jdbcType=VARCHAR}
+			,#{ro_name3,jdbcType=VARCHAR}
+			,#{ro_name4,jdbcType=VARCHAR}
+			,#{ro_name5,jdbcType=VARCHAR}
+			,#{ro_name6,jdbcType=VARCHAR}
+			,#{ro_name7,jdbcType=VARCHAR}
+			,#{ro_name8,jdbcType=VARCHAR}
+			,#{ro_name9,jdbcType=VARCHAR}
+			,#{ro_name10,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="updateshop">
+		update shop set shop_place =#{shop_place,jdbcType=VARCHAR}
+						,ro_name1=#{ro_name1,jdbcType=VARCHAR}
+						,ro_name2=#{ro_name2,jdbcType=VARCHAR}
+						,ro_name3=#{ro_name3,jdbcType=VARCHAR}
+						,ro_name4=#{ro_name4,jdbcType=VARCHAR}
+						,ro_name5=#{ro_name5,jdbcType=VARCHAR}
+						,ro_name6=#{ro_name6,jdbcType=VARCHAR}
+						,ro_name7=#{ro_name7,jdbcType=VARCHAR}
+						,ro_name8=#{ro_name8,jdbcType=VARCHAR}
+						,ro_name9=#{ro_name9,jdbcType=VARCHAR}
+						,ro_name10=#{ro_name10,jdbcType=VARCHAR}
+		where shop_id = #{shop_id}
+	</update>
+	
+	<delete id="deleteshop">
+		delete from shop
+		where shop_id = #{shop_id,jdbcType=VARCHAR}
+	</delete>
+
+</mapper>
+
